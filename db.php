@@ -37,13 +37,13 @@
 		global $_SQL;
 		
 		if ( $rs = mysqli_query( $cn, $_SQL ) ) {
-			if ( $rs ->num_rows == 1 )
-				$data = $rs->fetch_assoc();
-			else {
-				$data = array();
+			//if ( $rs ->num_rows == 1 )
+				//$data = $rs->fetch_assoc();
+			//else {
+				//$data = array();
 				while ( $row = $rs->fetch_assoc() )
 					$data[] = $row;
-			}			
+			//}			
 		}
 
 		return $data;
