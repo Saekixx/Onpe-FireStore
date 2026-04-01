@@ -35,16 +35,11 @@
 		getConexion();
 		global $cn;
 		global $_SQL;
+
+		$data = array();
 		
-		if ( $rs = mysqli_query( $cn, $_SQL ) ) {
-			//if ( $rs ->num_rows == 1 )
-				//$data = $rs->fetch_assoc();
-			//else {
-				//$data = array();
-				while ( $row = $rs->fetch_assoc() )
-					$data[] = $row;
-			//}			
-		}
+		if ( $rs = mysqli_query( $cn, $_SQL ) ) 
+			while ( $row = $rs->fetch_assoc() ) $data[] = $row;
 
 		return $data;
 	}

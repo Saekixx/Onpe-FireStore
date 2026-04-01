@@ -10,10 +10,26 @@
   
   $longitud = count( $parametros );
 
-  if ( $longitud > 1 )
+  if ( $longitud > 1 ) {
     if ( $parametros[0] == "participacion" ) getParticipacion();
     else if ( $parametros[0] == "actas" && $parametros[1] == "ubigeo" ) getActasUbigeo();
-    else if ( $parametros[0] == "actas" && $parametros[1] == "numero" && $longitud == 3 ) getActasNumero();
+    else if ( $parametros[0] == "actas" && $parametros[1] == "numero" ) getActasNumero(); 
+  } else {
+    getOnpe();
+  }
+
+  function getOnpe() {
+    global $_SQL;
+    global $parametros;
+
+    $_SQL = "select * from $parametros[0]";
+    
+    $data = getRegistros();
+    $success = count( $data ) > 0 ? true : false;
+    $message = $success ? "Registros encontrados" : "Registros no encontrados";
+
+    echo getJSON($success, $data, $message);
+  }
 
   function getParticipacion() {
     global $_SQL;

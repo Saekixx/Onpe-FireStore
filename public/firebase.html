@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+      } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA8Kkz6lu_kbAWMEIO6COM_2ul5k5zZha4",
+        authDomain: "onpe-oficial.firebaseapp.com",
+        projectId: "onpe-oficial",
+        storageBucket: "onpe-oficial.firebasestorage.app",
+        messagingSenderId: "883477516113",
+        appId: "1:883477516113:web:85ffba98a058f39c8dcd70",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const setParticipacion = async (id) => {
+        const data_departamentos = await fetch(
+          `http://localhost/Onpe-FireStore/participacion/${id}`,
+        );
+        const departamentos = await data_departamentos.json();
+
+        departamentos.data.forEach(async (departamento) => {
+          departamento.ID = id;
+          addDoc(collection(db, "participacion_departamento"), departamento);
+
+          const data_provincia = await fetch(
+            `http://localhost/Onpe-FireStore/participacion/${id}/${departamento.DPD}`,
+          );
+          const provincias = await data_provincia.json();
+
+          provincias.data.forEach(async (provincia) => {
+            provincia.Departamento = departamento.DPD;
+            addDoc(collection(db, "participacion_provincia"), provincia);
+
+            const data_distrito = await fetch(
+              `http://localhost/Onpe-FireStore/participacion/${id}/${departamento.DPD}/${provincia.DPD}`,
+            );
+            const distritos = await data_distrito.json();
+
+            distritos.data.forEach((distrito) => {
+              distrito.Departamento = departamento.DPD;
+              distrito.Provincia = provincia.DPD;
+              addDoc(collection(db, "participacion_distrito"), distrito);
+            });
+          });
+        });
+      };
+
+      const setUbigeo = async (id) => {
+        const data = await fetch(`http://localhost/Onpe-FireStore/${id}`);
+        const p = await data.json();
+        p.data.forEach(async (item) => {
+          addDoc(collection(db, `${id}`), item);
+        });
+      };
+
+      // setParticipacion("Nacional");
+      // setParticipacion("Extranjero");
+      // setUbigeo("departamento");
+      // setUbigeo("provincia");
+      // setUbigeo("distrito");
+    </script>
+  </body>
+</html>
