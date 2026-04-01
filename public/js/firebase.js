@@ -3,7 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import {
   getFirestore,
   collection,
-  addDoc,
   getDocs,
   where,
   orderBy,
@@ -26,19 +25,77 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const getNacional = async () => {
-  const query = await getDocs(collection(db, "participacion_departamento"));
-  return query.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+const getNacional = async (id) => {
+  const q = query(
+    collection(db, "participacion_departamento"),
+    where("ID", "==", id),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
-const getProv = async () => {
-  const query = await getDocs(collection(db, "participacion_provincia"));
-  return query.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+const getProv = async (departamento) => {
+  const qdepartamento = query(
+    collection(db, "participacion_departamento"),
+    where("DPD", "==", departamento),
+  );
+
+  const q = query(
+    collection(db, "participacion_provincia"),
+    where("Departamento", "==", departamento),
+  );
+
+  const queryone = await getDocs(qdepartamento);
+  const querySnapshot = await getDocs(q);
+  const detalledepartamento = queryone.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  const provincias = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return {
+    departamento: detalledepartamento,
+    provincias: provincias,
+  };
 };
 
-const getDistrito = async () => {
-  const query = await getDocs(collection(db, "participacion_distrito"));
-  return query.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+const getDistrito = async (provincia) => {
+  const qprovincia = query(
+    collection(db, "participacion_provincia"),
+    where("DPD", "==", provincia),
+  );
+
+  const q = query(
+    collection(db, "participacion_distrito"),
+    where("Provincia", "==", provincia),
+  );
+  const queryOne = await getDocs(qprovincia);
+  const querySnapshot = await getDocs(q);
+  const detalleprovincia = queryOne.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  const distrito = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return {
+    provincia: detalleprovincia,
+    distritos: distrito,
+  };
 };
 
-export { getNacional, getProv, getDistrito };
+const getDetalleDistrito = async (distrito) => {
+  const q = query(
+    collection(db, "participacion_distrito"),
+    where("DPD", "==", distrito),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export { getNacional, getProv, getDistrito, getDetalleDistrito };
