@@ -13,12 +13,12 @@ import {
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBJ4W-i5SNKnj5XqkKi91c32m3Tv5fQhuY",
-  authDomain: "onpe-rodrigo.firebaseapp.com",
-  projectId: "onpe-rodrigo",
-  storageBucket: "onpe-rodrigo.firebasestorage.app",
-  messagingSenderId: "603629458203",
-  appId: "1:603629458203:web:b0f7686e50f169f78779be",
+  apiKey: "AIzaSyA8Kkz6lu_kbAWMEIO6COM_2ul5k5zZha4",
+  authDomain: "onpe-oficial.firebaseapp.com",
+  projectId: "onpe-oficial",
+  storageBucket: "onpe-oficial.firebasestorage.app",
+  messagingSenderId: "883477516113",
+  appId: "1:883477516113:web:85ffba98a058f39c8dcd70",
 };
 
 // Initialize Firebase
@@ -98,4 +98,49 @@ const getDetalleDistrito = async (distrito) => {
   return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
-export { getNacional, getProv, getDistrito, getDetalleDistrito };
+const departamento = async () => {
+  const q = query(collection(db, "departamento"), orderBy("Detalle", "asc"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+const provincia = async (id) => {
+  const q = query(
+    collection(db, "provincia"),
+    where("idDepartamento", "==", id),
+    orderBy("Detalle", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+const distrito = async (id) => {
+  const q = query(
+    collection(db, "distrito"),
+    where("idProvincia", "==", id),
+    orderBy("Detalle", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+const localVotacion = async (id) => {
+  const q = query(
+    collection(db, "local_votacion"),
+    where("idDistrito", "==", id),
+    orderBy("idLocalVotacion", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export {
+  getNacional,
+  getProv,
+  getDistrito,
+  getDetalleDistrito,
+  departamento,
+  provincia,
+  distrito,
+  localVotacion,
+};

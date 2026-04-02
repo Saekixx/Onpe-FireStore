@@ -67,6 +67,54 @@
         });
       };
 
+      const setLocalVotacion = async (id) => {
+        const data = await fetch(
+          `http://localhost/Onpe-FireStore/actas/ubigeo/${id}`,
+        );
+        const p = await data.json();
+
+        p.data.forEach(async (dep) => {
+          const data_provincia = await fetch(
+            `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}`,
+          );
+          const provincias = await data_provincia.json();
+
+          provincias.data.forEach(async (prov) => {
+            const data_distrito = await fetch(
+              `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}`,
+            );
+            const distritos = await data_distrito.json();
+
+            distritos.data.forEach(async (dist) => {
+              const data_distrito = await fetch(
+                `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}`,
+              );
+              const locales = await data_distrito.json();
+
+              locales.data.forEach(async (local) => {
+                // Obtenemos los locales de votacion con la id del distrito al que pertenece
+                //
+                // local.idDistrito = dist.idDistrito;
+                // addDoc(collection(db, "local_votacion"), local);
+                // const data_locales = await fetch(
+                //   `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}/${local.Detalle}`,
+                // );
+                // const mesas = await data_locales.json();
+                // mesas.data.forEach(async (mesa) => {
+                //   mesa.idLocalVotacion = local.idLocalVotacion;
+                //   console.log(messagingSenderId);
+                // });
+              });
+            });
+          });
+        });
+      };
+
+      // setLocalVotacion("Peru");
+
+      // // Me falta implementar los locales de votacion del extranjero
+      // setLocalVotacion("Europa");
+
       // setParticipacion("Nacional");
       // setParticipacion("Extranjero");
       // setUbigeo("departamento");
