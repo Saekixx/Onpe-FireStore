@@ -3,6 +3,7 @@ import {
   provincia,
   distrito,
   localVotacion,
+  grupo_votacion,
 } from "./firebase.js";
 
 const iniciarUbigeo = async () => {
@@ -11,6 +12,7 @@ const iniciarUbigeo = async () => {
   const comboProv = document.getElementById("cdgoProv");
   const comboDist = document.getElementById("cdgoDist");
   const comboLocal = document.getElementById("actas_ubigeo");
+  const tablaMesas = document.getElementById("actas_mesas");
 
   const bloquearInferiores = (selects) => {
     selects.forEach((select) => {
@@ -59,7 +61,7 @@ const iniciarUbigeo = async () => {
 
     const datosProvs = await provincia(idDep);
     llenarSelect(comboProv, datosProvs, "idProvincia");
-    bloquearInferiores([comboDist]);
+    bloquearInferiores([comboDist, comboLocal]);
   };
 
   const manejarProvincia = async () => {
@@ -87,10 +89,45 @@ const iniciarUbigeo = async () => {
     llenarSelect(comboLocal, datosLocal, "idLocalVotacion");
   };
 
+  const manejarLocal = async () => {
+    const idLocal = comboLocal.value;
+
+    if (!idLocal) {
+      tablaMesas.innerHTML = "";
+      return;
+    }
+
+    const datosGrupo = await grupo_votacion(idLocal);
+
+    let html = "";
+    if (datosGrupo && datosGrupo.length > 0) {
+      html = "<tr>";
+      datosGrupo.forEach((mesa, index) => {
+        // Creamos la celda para cada mesa
+        html += `
+          <td bgcolor="#C1C1C1">
+            <a href="actas_ubigeo.html?id=${mesa.idGrupoVotacion}">${mesa.idGrupoVotacion}</a>
+          </td>`;
+
+        if ((index + 1) % 10 === 0 && index !== datosGrupo.length - 1) {
+          html += "</tr><tr>";
+        }
+      });
+      html += "</tr>";
+    } else {
+      html =
+        "<tr><td colspan='10' style='text-align:center; padding:20px;'>No se encontraron mesas para este local.</td></tr>";
+    }
+
+    // Insertamos en el tbody
+    tablaMesas.innerHTML = html;
+  };
+
   comboAmbito.addEventListener("change", manejarAmbito);
   comboDep.addEventListener("change", manejarDepartamento);
   comboProv.addEventListener("change", manejarProvincia);
   comboDist.addEventListener("change", manejarDistrito);
+  comboLocal.addEventListener("change", manejarLocal);
 
   comboDep.disabled = true;
   comboProv.disabled = true;

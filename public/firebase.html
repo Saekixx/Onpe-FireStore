@@ -68,46 +68,55 @@
       };
 
       const setLocalVotacion = async (id) => {
-        const data = await fetch(
-          `http://localhost/Onpe-FireStore/actas/ubigeo/${id}`,
-        );
-        const p = await data.json();
-
-        p.data.forEach(async (dep) => {
-          const data_provincia = await fetch(
-            `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}`,
+        try {
+          const data = await fetch(
+            `http://localhost/Onpe-FireStore/actas/ubigeo/${id}`,
           );
-          const provincias = await data_provincia.json();
+          const p = await data.json();
 
-          provincias.data.forEach(async (prov) => {
-            const data_distrito = await fetch(
-              `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}`,
+          for (const dep of p.data) {
+            const dataProv = await fetch(
+              `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}`,
             );
-            const distritos = await data_distrito.json();
+            const provincias = await dataProv.json();
 
-            distritos.data.forEach(async (dist) => {
-              const data_distrito = await fetch(
-                `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}`,
+            for (const prov of provincias.data) {
+              const dataDist = await fetch(
+                `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}`,
               );
-              const locales = await data_distrito.json();
+              const distritos = await dataDist.json();
 
-              locales.data.forEach(async (local) => {
-                // Obtenemos los locales de votacion con la id del distrito al que pertenece
-                //
-                // local.idDistrito = dist.idDistrito;
-                // addDoc(collection(db, "local_votacion"), local);
-                // const data_locales = await fetch(
-                //   `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}/${local.Detalle}`,
-                // );
-                // const mesas = await data_locales.json();
-                // mesas.data.forEach(async (mesa) => {
-                //   mesa.idLocalVotacion = local.idLocalVotacion;
-                //   console.log(messagingSenderId);
-                // });
-              });
-            });
-          });
-        });
+              for (const dist of distritos.data) {
+                const dataLocal = await fetch(
+                  `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}`,
+                );
+                const locales = await dataLocal.json();
+
+                for (const local of locales.data) {
+                  local.idDistrito = dist.idDistrito;
+
+                  const urlGrupo = `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}/${local.RazonSocial}`;
+                  const dataGrupo = await fetch(urlGrupo);
+                  const grupo_votacion = await dataGrupo.json();
+
+                  if (grupo_votacion && grupo_votacion.data) {
+                    for (const grupo of grupo_votacion.data) {
+                      grupo.idLocalVotacion = local.idLocalVotacion;
+                      addDoc(collection(db, "grupo_votacion"), grupo);
+                    }
+                  } else {
+                    console.warn(
+                      `Aviso: El local ${local.RazonSocial} no devolvió grupos válidos.`,
+                    );
+                  }
+                }
+              }
+            }
+          }
+          console.log("¡Migración finalizada!");
+        } catch (error) {
+          console.error("Error fatal en la migración:", error);
+        }
       };
 
       // setLocalVotacion("Peru");
