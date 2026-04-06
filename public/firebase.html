@@ -99,15 +99,24 @@
                   const dataGrupo = await fetch(urlGrupo);
                   const grupo_votacion = await dataGrupo.json();
 
-                  if (grupo_votacion && grupo_votacion.data) {
-                    for (const grupo of grupo_votacion.data) {
-                      grupo.idLocalVotacion = local.idLocalVotacion;
-                      addDoc(collection(db, "grupo_votacion"), grupo);
+                  for (const grupo of grupo_votacion.data) {
+                    grupo.idLocalVotacion = local.idLocalVotacion;
+                    // addDoc(collection(db, "grupo_votacion"), grupo);
+
+                    const urlMesa = `http://localhost/Onpe-FireStore/actas/ubigeo/${id}/${dep.Detalle}/${prov.Detalle}/${dist.Detalle}/${local.RazonSocial}/${grupo.idGrupoVotacion}`;
+                    const dataMesa = await fetch(urlMesa);
+                    const mesas = await dataMesa.json();
+
+                    if (mesas && mesas.data) {
+                      for (const mesa of mesas.data) {
+                        mesa.idGrupoVotacion = grupo.idGrupoVotacion;
+                        addDoc(collection(db, "actas"), mesa);
+                      }
+                    } else {
+                      console.log(
+                        `No se encontraron mesas para el grupo de votación ${grupo.idGrupoVotacion}`,
+                      );
                     }
-                  } else {
-                    console.warn(
-                      `Aviso: El local ${local.RazonSocial} no devolvió grupos válidos.`,
-                    );
                   }
                 }
               }
@@ -119,7 +128,7 @@
         }
       };
 
-      // setLocalVotacion("Peru");
+      //setLocalVotacion("Peru");
 
       // // Me falta implementar los locales de votacion del extranjero
       // setLocalVotacion("Europa");

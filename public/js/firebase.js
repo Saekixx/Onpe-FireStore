@@ -145,6 +145,17 @@ const grupo_votacion = async (id) => {
   return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
+const actas = async (id) => {
+  const idLimpio = String(id).trim();
+  const q = query(
+    collection(db, "actas"),
+    where("idGrupoVotacion", "==", idLimpio),
+    orderBy("idGrupoVotacion", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
 export {
   getNacional,
   getProv,
@@ -155,4 +166,5 @@ export {
   distrito,
   localVotacion,
   grupo_votacion,
+  actas,
 };
